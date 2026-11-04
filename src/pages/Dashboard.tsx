@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { reportsApi, villagesApi } from "../api";
-import type { ReportResult, Village } from "../types";
+import type { ReportResult } from "../types";
 import { useAuth } from "../context/AuthContext";
 
 interface Totals {
