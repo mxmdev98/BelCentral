@@ -1,6 +1,6 @@
-@import "tailwindcss";
-@reference "tailwindcss";
-
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 /* ----------------------------------------------------------------------- */
 /* Theme — brand colors + font. Replaces the old tailwind.config.js.        */
 /* ----------------------------------------------------------------------- */
