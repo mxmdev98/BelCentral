@@ -104,8 +104,18 @@ export default function ResidentForm() {
     setServerError(null);
     setSubmitting(true);
     const payload = {
-      ...values,
-      // age is computed by the backend; never send it.
+      full_name: values.full_name,
+      father_name: values.father_name,
+      mother_name: values.mother_name,
+      gender: values.gender,
+      date_of_birth: values.date_of_birth,
+      village_id: values.village_id,
+      tribe_id: values.tribe_id,
+      clan_id: values.clan_id,
+      employment_status: values.employment_status,
+      marital_status: values.marital_status,
+      education_level: values.education_level,
+      profession: values.profession ?? null, 
     };
     try {
       if (isEdit && id) {
