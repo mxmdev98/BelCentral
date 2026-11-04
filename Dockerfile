@@ -22,8 +22,8 @@ RUN npm install -g serve@14
 COPY --from=builder /app/dist ./dist
 
 # Serve the SPA on port 5173 (Dokploy will route to it)
-ENV PORT=5173
-EXPOSE 5173
+ENV PORT=3000
+EXPOSE 3000
 
 # `serve -s` enables SPA fallback (any unknown route → index.html)
 CMD ["sh", "-c", "serve -s dist -l ${PORT}"]
