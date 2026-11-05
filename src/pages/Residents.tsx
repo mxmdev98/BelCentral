@@ -16,7 +16,7 @@ const MARITAL: MaritalStatus[] = ["Single","Married","Widowed","Divorced","Separ
 const EDUCATION: EducationLevel[] = ["None","Primary","Secondary","Vocational","Tertiary"];
 
 export default function Residents() {
-  const { can, isAdmin } = useAuth();
+  const { can } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState<PaginatedResidents | null>(null);
   const [loading, setLoading] = useState(false);
