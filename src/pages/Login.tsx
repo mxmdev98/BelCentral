@@ -82,10 +82,6 @@ export default function Login() {
             <button type="submit" className="btn-primary w-full" disabled={submitting}>
               {submitting ? "Signing in…" : "Sign in"}
             </button>
-            <p className="text-xs text-slate-500 text-center">
-              Default admin: <code className="bg-slate-100 px-1 rounded">admin</code> /{" "}
-              <code className="bg-slate-100 px-1 rounded">changeme123</code>
-            </p>
           </div>
         </form>
 
