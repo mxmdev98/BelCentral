@@ -1,17 +1,19 @@
 // src/pages/Dashboard.tsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { reportsApi, villagesApi } from "../api";
+import { reportsApi, villagesApi, wardOfficialsApi } from "../api";
 import type { ReportResult } from "../types";
 import { useAuth } from "../context/AuthContext";
 
 interface Totals {
   totalResidents: number;
   totalVillages: number;
+  totalOfficials: number;
+  activeOfficials: number;
 }
 
 export default function Dashboard() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, can } = useAuth();
   const [totals, setTotals] = useState<Totals | null>(null);
   const [perVillage, setPerVillage] = useState<ReportResult | null>(null);
   const [ageDist, setAgeDist] = useState<ReportResult | null>(null);
@@ -22,10 +24,13 @@ export default function Dashboard() {
       villagesApi.list(),
       reportsApi.get("residents_per_village"),
       reportsApi.get("age_distribution"),
-    ]).then(([v, pv, age]) => {
+      wardOfficialsApi.list(),
+    ]).then(([v, pv, age, officials]) => {
       setTotals({
         totalVillages: v.items.length,
         totalResidents: pv.rows.reduce((s, r) => s + r.count, 0),
+        totalOfficials: officials.items.length,
+        activeOfficials: officials.items.filter((o) => o.is_active).length,
       });
       setPerVillage(pv);
       setAgeDist(age);
@@ -44,9 +49,18 @@ export default function Dashboard() {
       </div>
 
       {/* Quick stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <StatCard label="Total residents" value={totals?.totalResidents ?? 0} />
         <StatCard label="Villages" value={totals?.totalVillages ?? 0} />
+        <Link to="/ward-officials" className="card hover:shadow-md transition">
+          <div className="card-body">
+            <div className="text-xs uppercase text-slate-500">Ward officials</div>
+            <div className="text-3xl font-bold mt-1">{totals?.totalOfficials ?? 0}</div>
+            <div className="text-xs text-slate-500 mt-1">
+              {totals?.activeOfficials ?? 0} active
+            </div>
+          </div>
+        </Link>
         <Link to="/residents" className="card hover:shadow-md transition">
           <div className="card-body">
             <div className="text-xs uppercase text-slate-500">Quick action</div>
@@ -107,8 +121,14 @@ export default function Dashboard() {
 
       <div className="card">
         <div className="card-body flex flex-wrap gap-3">
-          <Link to="/residents/new" className="btn-primary">+ New resident</Link>
-          <Link to="/residents" className="btn-secondary">Search & filter</Link>
+          {can("residents", "create") && (
+            <Link to="/residents/new" className="btn-primary">+ New resident</Link>
+          )}
+          {can("ward_officials", "create") && (
+            <Link to="/ward-officials/new" className="btn-primary">+ New official</Link>
+          )}
+          <Link to="/residents" className="btn-secondary">Search residents</Link>
+          <Link to="/ward-officials" className="btn-secondary">View officials</Link>
           <Link to="/reports" className="btn-secondary">View reports</Link>
         </div>
       </div>

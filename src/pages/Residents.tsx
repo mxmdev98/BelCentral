@@ -7,6 +7,7 @@ import type {
   Village, Tribe, Clan,
   Gender, EmploymentStatus, MaritalStatus, EducationLevel,
 } from "../types";
+import { useAuth } from "../context/AuthContext";
 import Pagination from "../components/Pagination";
 
 const GENDERS: Gender[] = ["Male", "Female"];
@@ -15,6 +16,7 @@ const MARITAL: MaritalStatus[] = ["Single","Married","Widowed","Divorced","Separ
 const EDUCATION: EducationLevel[] = ["None","Primary","Secondary","Vocational","Tertiary"];
 
 export default function Residents() {
+  const { can, isAdmin } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState<PaginatedResidents | null>(null);
   const [loading, setLoading] = useState(false);
@@ -108,7 +110,9 @@ export default function Residents() {
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h1 className="text-2xl font-bold">Residents</h1>
-        <Link to="/residents/new" className="btn-primary">+ New resident</Link>
+        {can("residents", "create") && (
+          <Link to="/residents/new" className="btn-primary">+ New resident</Link>
+        )}
       </div>
 
       {/* Search + filters */}
@@ -273,9 +277,11 @@ export default function Residents() {
                   </td>
                   <td className="px-4 py-3">{r.employment_status}</td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
-                    <Link to={`/residents/${r.id}/edit`} className="text-brand-700 hover:underline mr-3">
-                      Edit
-                    </Link>
+                    {can("residents", "update") && (
+                      <Link to={`/residents/${r.id}/edit`} className="text-brand-700 hover:underline mr-3">
+                        Edit
+                      </Link>
+                    )}
                   </td>
                 </tr>
               ))}

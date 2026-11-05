@@ -103,6 +103,8 @@ export default function ResidentForm() {
   async function onSubmit(values: FormValues) {
     setServerError(null);
     setSubmitting(true);
+    // Normalize: convert undefined profession to null so the payload matches
+    // the Resident type (profession: string | null, not optional).
     const payload = {
       full_name: values.full_name,
       father_name: values.father_name,
@@ -115,7 +117,7 @@ export default function ResidentForm() {
       employment_status: values.employment_status,
       marital_status: values.marital_status,
       education_level: values.education_level,
-      profession: values.profession ?? null, 
+      profession: values.profession ?? null,
     };
     try {
       if (isEdit && id) {
@@ -123,7 +125,7 @@ export default function ResidentForm() {
         push("success", "Resident updated");
         navigate(`/residents/${id}`);
       } else {
-        const created = await residentsApi.create(payload as never);
+        const created = await residentsApi.create(payload);
         push("success", "Resident created");
         navigate(`/residents/${created.id}`);
       }

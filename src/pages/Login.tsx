@@ -46,13 +46,13 @@ export default function Login() {
           <div className="inline-flex h-12 w-12 rounded-lg bg-brand-600 text-white items-center justify-center font-bold text-lg mb-3">
             BC
           </div>
-          <h1 className="text-2xl font-bold text-slate-800">Bel Central LLG</h1>
-          <p className="text-sm text-slate-500">Record Book Management System</p>
+          <h1 className="text-2xl font-bold text-slate-800">Bel Central</h1>
+          <p className="text-sm text-slate-500">LLG/Ward Record Book Management System</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="card">
           <div className="card-body space-y-4">
-            <h2 className="text-lg font-semibold">Sign in</h2>
+            <h2 className="text-lg font-semibold ">Sign in</h2>
             {serverError && (
               <div className="rounded-md bg-red-50 border border-red-200 text-red-700 px-3 py-2 text-sm">
                 {serverError}

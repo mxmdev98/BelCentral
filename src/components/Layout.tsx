@@ -41,7 +41,9 @@ export default function Layout({ children }: { children: ReactNode }) {
           <nav className="flex items-center gap-1 flex-1">
             {navItem("/dashboard", "Dashboard")}
             {navItem("/residents", "Residents")}
+            {navItem("/ward-officials", "Officials")}
             {navItem("/reports", "Reports")}
+            {isAdmin && navItem("/admin", "Admin")}
           </nav>
           <div className="flex items-center gap-3 text-sm">
             <div className="hidden sm:block text-right">

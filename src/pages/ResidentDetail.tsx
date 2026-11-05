@@ -11,7 +11,7 @@ import { useToast } from "../components/Toast";
 export default function ResidentDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { isAdmin, can } = useAuth();
   const { push } = useToast();
   const [resident, setResident] = useState<ResidentDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,7 +62,9 @@ export default function ResidentDetail() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Link to={`/residents/${resident.id}/edit`} className="btn-secondary">Edit</Link>
+          {can("residents", "update") && (
+            <Link to={`/residents/${resident.id}/edit`} className="btn-secondary">Edit</Link>
+          )}
           {isAdmin && (
             <button onClick={() => setShowDelete(true)} className="btn-danger">Delete</button>
           )}

@@ -3,7 +3,8 @@ import { api } from "./client";
 import type {
   AuthUser, Village, Tribe, Clan,
   Resident, ResidentDetail, PaginatedResidents, ResidentSearchParams,
-  ReportResult, ReportType,
+  ReportResult, ReportType, WardOfficial,
+  User, UserWithPermissions,
 } from "../types";
 
 // ---- auth ----
@@ -70,4 +71,37 @@ export const residentsApi = {
 // ---- reports ----
 export const reportsApi = {
   get: (type: ReportType) => api.get<ReportResult>(`/reports/${type}`),
+};
+
+// ---- ward officials ----
+export const wardOfficialsApi = {
+  list: (activeOnly = false) =>
+    api.get<{ items: WardOfficial[] }>(`/ward-officials${activeOnly ? "?active=true" : ""}`),
+  get: (id: number) => api.get<WardOfficial>(`/ward-officials/${id}`),
+  create: (body: Partial<WardOfficial>) => api.post<WardOfficial>("/ward-officials", body),
+  update: (id: number, body: Partial<WardOfficial>) => api.put<WardOfficial>(`/ward-officials/${id}`, body),
+  remove: (id: number) => api.del<void>(`/ward-officials/${id}`),
+};
+
+// ---- users (admin) ----
+export const usersApi = {
+  list: () => api.get<{ items: User[] }>("/users"),
+  create: (username: string, password: string, role: "official" | "admin") =>
+    api.post<User>("/users", { username, password, role }),
+  resetPassword: (id: number, password: string) =>
+    api.put<{ ok: boolean }>(`/users/${id}/password`, { password }),
+  toggleActive: (id: number, isActive: boolean) =>
+    api.put<User>(`/users/${id}/active`, { is_active: isActive }),
+  remove: (id: number) => api.del<void>(`/users/${id}`),
+};
+
+// ---- permissions (admin) ----
+export const permissionsApi = {
+  list: () => api.get<{ items: UserWithPermissions[] }>("/permissions"),
+  get: (userId: number) => api.get<UserWithPermissions>(`/permissions/${userId}`),
+  getMine: () => api.get<UserWithPermissions>("/permissions/me"),
+  upsert: (userId: number, body: {
+    resource: string; can_read: boolean; can_create: boolean; can_update: boolean;
+  }) => api.put(`/permissions/${userId}`, body),
+  remove: (userId: number, resource: string) => api.del<void>(`/permissions/${userId}/${resource}`),
 };

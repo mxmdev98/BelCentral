@@ -9,6 +9,14 @@ export interface AuthUser {
   role: Role;
 }
 
+// Client-side permission flags for the logged-in user.
+// Admins always have all flags true.
+export interface UserPermissions {
+  residents: { read: boolean; create: boolean; update: boolean };
+  ward_officials: { read: boolean; create: boolean; update: boolean };
+  [key: string]: { read: boolean; create: boolean; update: boolean };
+}
+
 export interface Village {
   id: number;
   name: string;
@@ -112,6 +120,51 @@ export interface ReportResult {
   type: ReportType;
   columns: string[];
   rows: ReportRow[];
+}
+
+// ---- Ward Officials ----
+export interface WardOfficial {
+  id: number;
+  surname: string;
+  given_name: string;
+  gender: Gender;
+  date_of_birth: string | null;
+  official_type: string;
+  position_status: string;
+  village_id: number | null;
+  village_name: string | null;
+  phone: string | null;
+  email: string | null;
+  appointed_date: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// ---- Users & permissions (admin) ----
+export type UserRole = "official" | "admin";
+
+export interface User {
+  id: number;
+  username: string;
+  role: UserRole;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface UserPermission {
+  id: number;
+  user_id: number;
+  resource: string;
+  can_read: boolean;
+  can_create: boolean;
+  can_update: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserWithPermissions extends User {
+  permissions: UserPermission[];
 }
 
 // Standard API error shape (mirrors backend errorHandler).
