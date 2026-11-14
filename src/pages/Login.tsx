@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "../context/AuthContext";
 import { ApiRequestError } from "../api/client";
+import PasswordField from "../components/PasswordField";
 
 const schema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -46,8 +47,8 @@ export default function Login() {
           <div className="inline-flex h-12 w-12 rounded-lg bg-brand-600 text-white items-center justify-center font-bold text-lg mb-3">
             BC
           </div>
-          <h1 className="text-2xl font-bold text-slate-800">Bel Central LLG</h1>
-          <p className="text-sm text-slate-500">Record Book Management System</p>
+          <h1 className="text-2xl font-bold text-slate-800">Bel Central</h1>
+          <p className="text-sm text-slate-500">Ward Record Book Management System</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="card">
@@ -58,7 +59,7 @@ export default function Login() {
                 {serverError}
               </div>
             )}
-            <div>
+            <div >
               <label className="label" htmlFor="username">Username</label>
               <input
                 id="username"
@@ -68,30 +69,24 @@ export default function Login() {
               />
               {errors.username && <p className="field-error">{errors.username.message}</p>}
             </div>
-            <div>
-              <label className="label" htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                className="input"
-                autoComplete="current-password"
-                {...register("password")}
-              />
-              {errors.password && <p className="field-error">{errors.password.message}</p>}
-            </div>
+            <PasswordField
+              label="Password"
+              inputProps={{
+                id: "password",
+                autoComplete: "current-password",
+                ...register("password"),
+              }}
+              error={errors.password?.message}
+            />
             <button type="submit" className="btn-primary w-full" disabled={submitting}>
               {submitting ? "Signing in…" : "Sign in"}
             </button>
-            <p className="text-xs text-slate-500 text-center">
-              Default admin: <code className="bg-slate-100 px-1 rounded">admin</code> /{" "}
-              <code className="bg-slate-100 px-1 rounded">changeme123</code>
-            </p>
           </div>
         </form>
 
         <div className="mt-4 text-center">
           <Link to="#" className="text-xs text-slate-400 pointer-events-none">
-            For ward officials and LLG administrators
+            For Elected Ward Members & Officials
           </Link>
         </div>
       </div>

@@ -138,8 +138,8 @@ export default function Layout({ children }: { children: ReactNode }) {
           <Link to="/" className="flex items-center gap-2 mr-4">
             <div className="h-8 w-8 rounded-md bg-brand-600 text-white grid place-items-center font-bold">BC</div>
             <div>
-              <div className="text-sm font-semibold leading-tight">Bel Central LLG</div>
-              <div className="text-xs text-slate-500 leading-tight">Record Book</div>
+              <div className="text-sm font-semibold leading-tight">Bel Central</div>
+              <div className="text-xs text-slate-500 leading-tight">Ward Record Book</div>
             </div>
           </Link>
           <nav className="flex items-center gap-1 flex-wrap">
@@ -164,7 +164,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       </header>
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">{children}</main>
       <footer className="text-center text-xs text-slate-400 py-4">
-        Bel Central LLG · Record Book Management System
+        Bel Central · Ward Record Book Management System
       </footer>
     </div>
   );

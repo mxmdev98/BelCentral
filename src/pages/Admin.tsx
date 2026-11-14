@@ -4,11 +4,29 @@ import { usersApi, permissionsApi } from "../api";
 import type { UserWithPermissions } from "../types";
 import { useToast } from "../components/Toast";
 import ConfirmDialog from "../components/ConfirmDialog";
+import PasswordField from "../components/PasswordField";
 import { ALL_RESOURCES, ALL_RESOURCE_KEYS } from "../config/permissions";
 
 const RESOURCE_LABELS: Record<string, string> = Object.fromEntries(
   ALL_RESOURCES.map((r) => [r.key, r.label])
 );
+
+// Color coding for the three permission actions. Each action gets its own hue
+// across header text, cell tint, and the checkbox accent-color, so the three
+// columns of checkboxes are visually distinct and easy to scan/toggle.
+// Read = green, Create = blue, Update = amber.
+type PermAction = "can_read" | "can_create" | "can_update";
+const ACTION_COLORS: Record<PermAction, { header: string; cell: string; accent: string }> = {
+  can_read:   { header: "text-green-700",   cell: "bg-green-50/60",   accent: "accent-green-600" },
+  can_create: { header: "text-blue-700",    cell: "bg-blue-50/60",    accent: "accent-blue-600" },
+  can_update: { header: "text-amber-700",   cell: "bg-amber-50/60",   accent: "accent-amber-600" },
+};
+const ACTIONS: PermAction[] = ["can_read", "can_create", "can_update"];
+const ACTION_LABELS: Record<PermAction, string> = {
+  can_read: "Read",
+  can_create: "Create",
+  can_update: "Update",
+};
 
 // Type for the local draft state: map of "userId:resource" -> {can_read, can_create, can_update}
 type PermDraftKey = string; // `${userId}:${resource}`
@@ -235,13 +253,14 @@ export default function Admin() {
                     />
                   </div>
                   <div>
-                    <label className="label">Password</label>
-                    <input
-                      className="input"
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Min 6 characters"
+                    <PasswordField
+                      label="Password"
+                      inputProps={{
+                        value: newPassword,
+                        onChange: (e) => setNewPassword(e.target.value),
+                        placeholder: "Min 6 characters",
+                        autoComplete: "new-password",
+                      }}
                     />
                   </div>
                   <div>
@@ -369,6 +388,15 @@ export default function Admin() {
             )}
           </div>
           <div className="overflow-x-auto">
+            <div className="flex items-center gap-4 px-4 py-2 text-xs text-slate-600 border-b border-slate-100">
+              <span className="font-medium text-slate-500">Legend:</span>
+              {ACTIONS.map((a) => (
+                <span key={a} className="inline-flex items-center gap-1.5">
+                  <span className={`inline-block h-3 w-3 rounded-sm ${ACTION_COLORS[a].cell} border border-slate-200`} />
+                  <span className={ACTION_COLORS[a].header}>{ACTION_LABELS[a]}</span>
+                </span>
+              ))}
+            </div>
             <table className="min-w-full text-sm">
               <thead className="bg-slate-50 text-slate-600 text-left">
                 <tr>
@@ -383,9 +411,15 @@ export default function Admin() {
                   <th></th>
                   {ALL_RESOURCE_KEYS.map((r) => (
                     <>
-                      <th key={`${r}-r`} className="px-2 py-2 text-xs text-center font-normal text-slate-500">Read</th>
-                      <th key={`${r}-c`} className="px-2 py-2 text-xs text-center font-normal text-slate-500">Create</th>
-                      <th key={`${r}-u`} className="px-2 py-2 text-xs text-center font-normal text-slate-500">Update</th>
+                      {ACTIONS.map((a) => (
+                        <th
+                          key={`${r}-${a}`}
+                          className={`px-2 py-2 text-xs text-center font-semibold ${ACTION_COLORS[a].header} ${ACTION_COLORS[a].cell}`}
+                          title={ACTION_LABELS[a]}
+                        >
+                          {ACTION_LABELS[a][0]}
+                        </th>
+                      ))}
                     </>
                   ))}
                 </tr>
@@ -419,33 +453,20 @@ export default function Admin() {
                       const checkboxDisabled = !permEditMode || isAdminOrDisabled;
                       return (
                         <>
-                          <td key={`${u.id}-${r}-r`} className="px-2 py-3 text-center">
-                            <input
-                              type="checkbox"
-                              className="h-4 w-4"
-                              checked={readVal}
-                              disabled={checkboxDisabled}
-                              onChange={() => toggleDraftPerm(u.id, r, "can_read")}
-                            />
-                          </td>
-                          <td key={`${u.id}-${r}-c`} className="px-2 py-3 text-center">
-                            <input
-                              type="checkbox"
-                              className="h-4 w-4"
-                              checked={createVal}
-                              disabled={checkboxDisabled}
-                              onChange={() => toggleDraftPerm(u.id, r, "can_create")}
-                            />
-                          </td>
-                          <td key={`${u.id}-${r}-u`} className="px-2 py-3 text-center">
-                            <input
-                              type="checkbox"
-                              className="h-4 w-4"
-                              checked={updateVal}
-                              disabled={checkboxDisabled}
-                              onChange={() => toggleDraftPerm(u.id, r, "can_update")}
-                            />
-                          </td>
+                          {ACTIONS.map((a) => {
+                            const val = a === "can_read" ? readVal : a === "can_create" ? createVal : updateVal;
+                            return (
+                              <td key={`${u.id}-${r}-${a[4]}`} className={`px-2 py-3 text-center ${ACTION_COLORS[a].cell}`}>
+                                <input
+                                  type="checkbox"
+                                  className={`h-4 w-4 cursor-pointer ${ACTION_COLORS[a].accent}`}
+                                  checked={val}
+                                  disabled={checkboxDisabled}
+                                  onChange={() => toggleDraftPerm(u.id, r, a)}
+                                />
+                              </td>
+                            );
+                          })}
                         </>
                       );
                     })}
@@ -464,13 +485,14 @@ export default function Admin() {
         message={
           <div className="space-y-2">
             <p>Enter a new password (min 6 characters):</p>
-            <input
-              className="input"
-              type="password"
-              value={resetPassword}
-              onChange={(e) => setResetPassword(e.target.value)}
-              placeholder="New password"
-              autoFocus
+            <PasswordField
+              inputProps={{
+                value: resetPassword,
+                onChange: (e) => setResetPassword(e.target.value),
+                placeholder: "New password",
+                autoFocus: true,
+                autoComplete: "new-password",
+              }}
             />
           </div>
         }
