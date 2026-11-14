@@ -4,12 +4,11 @@ import { usersApi, permissionsApi } from "../api";
 import type { UserWithPermissions } from "../types";
 import { useToast } from "../components/Toast";
 import ConfirmDialog from "../components/ConfirmDialog";
+import { ALL_RESOURCES, ALL_RESOURCE_KEYS } from "../config/permissions";
 
-const RESOURCES = ["residents", "ward_officials"] as const;
-const RESOURCE_LABELS: Record<string, string> = {
-  residents: "Residents",
-  ward_officials: "Ward Officials",
-};
+const RESOURCE_LABELS: Record<string, string> = Object.fromEntries(
+  ALL_RESOURCES.map((r) => [r.key, r.label])
+);
 
 // Type for the local draft state: map of "userId:resource" -> {can_read, can_create, can_update}
 type PermDraftKey = string; // `${userId}:${resource}`
@@ -120,7 +119,7 @@ export default function Admin() {
   function startEdit() {
     const draft: Record<PermDraftKey, PermDraftValue> = {};
     for (const u of users) {
-      for (const r of RESOURCES) {
+      for (const r of ALL_RESOURCE_KEYS) {
         const perm = u.permissions.find((p) => p.resource === r);
         draft[`${u.id}:${r}`] = {
           can_read: perm?.can_read ?? false,
@@ -160,7 +159,7 @@ export default function Admin() {
     for (const u of users) {
       // Skip admins (they bypass perms) and disabled users
       if (u.role === "admin" || !u.is_active) continue;
-      for (const r of RESOURCES) {
+      for (const r of ALL_RESOURCE_KEYS) {
         const key = `${u.id}:${r}`;
         const draft = permDraft[key];
         if (!draft) continue;
@@ -374,7 +373,7 @@ export default function Admin() {
               <thead className="bg-slate-50 text-slate-600 text-left">
                 <tr>
                   <th className="px-4 py-3 font-semibold">User</th>
-                  {RESOURCES.map((r) => (
+                  {ALL_RESOURCE_KEYS.map((r) => (
                     <th key={r} className="px-4 py-3 font-semibold text-center" colSpan={3}>
                       {RESOURCE_LABELS[r]}
                     </th>
@@ -382,7 +381,7 @@ export default function Admin() {
                 </tr>
                 <tr className="border-t border-slate-100">
                   <th></th>
-                  {RESOURCES.map((r) => (
+                  {ALL_RESOURCE_KEYS.map((r) => (
                     <>
                       <th key={`${r}-r`} className="px-2 py-2 text-xs text-center font-normal text-slate-500">Read</th>
                       <th key={`${r}-c`} className="px-2 py-2 text-xs text-center font-normal text-slate-500">Create</th>
@@ -401,7 +400,7 @@ export default function Admin() {
                         {!u.is_active && " · disabled"}
                       </div>
                     </td>
-                    {RESOURCES.map((r) => {
+                    {ALL_RESOURCE_KEYS.map((r) => {
                       const perm = u.permissions.find((p) => p.resource === r);
                       const key = `${u.id}:${r}`;
                       const isAdminOrDisabled = u.role === "admin" || !u.is_active;

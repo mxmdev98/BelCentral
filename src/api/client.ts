@@ -2,7 +2,13 @@
 // request so the httpOnly JWT cookie is forwarded automatically.
 import type { ApiError } from "../types";
 
-const BASE = "/api"; // Vite proxies /api → backend in dev; Nginx does it in prod.
+// In dev: Vite proxies /api → http://localhost:4000 (see vite.config.ts).
+// In production: either set VITE_BACKEND_URL to the API's full origin
+//   (e.g. https://api.yourdomain.com) for cross-origin, OR leave it unset
+//   to use /api (requires a reverse proxy rule that routes /api/* → backend).
+const BASE = import.meta.env.VITE_BACKEND_URL
+  ? `${import.meta.env.VITE_BACKEND_URL}/api`
+  : "/api";
 
 export class ApiRequestError extends Error {
   status: number;

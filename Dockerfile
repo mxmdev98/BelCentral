@@ -3,14 +3,18 @@
 FROM node:20-slim AS builder
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-RUN npm ci || npm install
+# Always fresh install — no lockfile dependency.
+COPY package.json ./
+RUN npm install --no-audit --no-fund
 
 COPY . .
-# VITE_BACKEND_URL must be set at build time — Dokploy will inject it.
-# Default to "/api" which means same-origin (frontend served at root,
-# backend reverse-proxied at /api).
-ENV VITE_BACKEND_URL=/api
+# VITE_BACKEND_URL is read at BUILD time by Vite and baked into the JS bundle.
+# - If Dokploy sets VITE_BACKEND_URL (e.g. https://api.yourdomain.com), the
+#   frontend will call the backend cross-origin.
+# - If not set, client.ts falls back to "/api" (same-origin, requires a
+#   reverse proxy rule routing /api/* → backend).
+# We deliberately do NOT set a default here so Dokploy's env var (if any)
+# is respected.
 RUN npm run build
 
 # --- Static file server ---
@@ -22,8 +26,8 @@ RUN npm install -g serve@14
 COPY --from=builder /app/dist ./dist
 
 # Serve the SPA on port 5173 (Dokploy will route to it)
-ENV PORT=3000
-EXPOSE 3000
+ENV PORT=5173
+EXPOSE 5173
 
 # `serve -s` enables SPA fallback (any unknown route → index.html)
 CMD ["sh", "-c", "serve -s dist -l ${PORT}"]

@@ -111,14 +111,15 @@ export default function ResidentForm() {
       mother_name: values.mother_name,
       gender: values.gender,
       date_of_birth: values.date_of_birth,
-      village_id: values.village_id,
-      tribe_id: values.tribe_id,
-      clan_id: values.clan_id,
+      village_id: Number(values.village_id),
+      tribe_id: Number(values.tribe_id),
+      clan_id: Number(values.clan_id),
       employment_status: values.employment_status,
       marital_status: values.marital_status,
       education_level: values.education_level,
       profession: values.profession ?? null,
     };
+    console.log("[ResidentForm] submitting payload:", payload);
     try {
       if (isEdit && id) {
         await residentsApi.update(id, payload);
@@ -130,8 +131,9 @@ export default function ResidentForm() {
         navigate(`/residents/${created.id}`);
       }
     } catch (err) {
+      console.error("[ResidentForm] submit failed:", err);
       if (err instanceof ApiRequestError) {
-        setServerError(err.message);
+        setServerError(err.message + (err.details ? " " + JSON.stringify(err.details) : ""));
       } else {
         setServerError("Save failed");
       }

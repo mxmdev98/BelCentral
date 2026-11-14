@@ -4,7 +4,8 @@ import type {
   AuthUser, Village, Tribe, Clan,
   Resident, ResidentDetail, PaginatedResidents, ResidentSearchParams,
   ReportResult, ReportType, WardOfficial,
-  User, UserWithPermissions,
+  User, UserWithPermissions, House,
+  DisabledPerson, Death, Birth, Marriage, Tenant, PersonMovement, Project, School,
 } from "../types";
 
 // ---- auth ----
@@ -105,3 +106,79 @@ export const permissionsApi = {
   }) => api.put(`/permissions/${userId}`, body),
   remove: (userId: number, resource: string) => api.del<void>(`/permissions/${userId}/${resource}`),
 };
+
+// ---- houses ----
+export const housesApi = {
+  list: () => api.get<{ items: House[] }>("/houses"),
+  get: (id: number) => api.get<House>(`/houses/${id}`),
+  create: (body: Partial<House>) => api.post<House>("/houses", body),
+  update: (id: number, body: Partial<House>) => api.put<House>(`/houses/${id}`, body),
+  remove: (id: number) => api.del<void>(`/houses/${id}`),
+};
+
+// ---- disabled_persons ----
+export const disabledPersonApi = {
+  list: () => api.get<{ items: DisabledPerson[] }>("/disabled-persons"),
+  get: (id: number) => api.get<DisabledPerson>(`/disabled-persons/${id}`),
+  create: (body: Partial<DisabledPerson>) => api.post<DisabledPerson>("/disabled-persons", body),
+  update: (id: number, body: Partial<DisabledPerson>) => api.put<DisabledPerson>(`/disabled-persons/${id}`, body),
+  remove: (id: number) => api.del<void>(`/disabled-persons/${id}`),
+};
+// ---- deaths ----
+export const deathApi = {
+  list: () => api.get<{ items: Death[] }>("/deaths"),
+  get: (id: number) => api.get<Death>(`/deaths/${id}`),
+  create: (body: Partial<Death>) => api.post<Death>("/deaths", body),
+  update: (id: number, body: Partial<Death>) => api.put<Death>(`/deaths/${id}`, body),
+  remove: (id: number) => api.del<void>(`/deaths/${id}`),
+};
+// ---- births ----
+export const birthApi = {
+  list: () => api.get<{ items: Birth[] }>("/births"),
+  get: (id: number) => api.get<Birth>(`/births/${id}`),
+  create: (body: Partial<Birth>) => api.post<Birth>("/births", body),
+  update: (id: number, body: Partial<Birth>) => api.put<Birth>(`/births/${id}`, body),
+  remove: (id: number) => api.del<void>(`/births/${id}`),
+};
+// ---- marriages ----
+export const marriageApi = {
+  list: () => api.get<{ items: Marriage[] }>("/marriages"),
+  get: (id: number) => api.get<Marriage>(`/marriages/${id}`),
+  create: (body: Partial<Marriage>) => api.post<Marriage>("/marriages", body),
+  update: (id: number, body: Partial<Marriage>) => api.put<Marriage>(`/marriages/${id}`, body),
+  remove: (id: number) => api.del<void>(`/marriages/${id}`),
+};
+// ---- tenants ----
+export const tenantApi = {
+  list: () => api.get<{ items: Tenant[] }>("/tenants"),
+  get: (id: number) => api.get<Tenant>(`/tenants/${id}`),
+  create: (body: Partial<Tenant>) => api.post<Tenant>("/tenants", body),
+  update: (id: number, body: Partial<Tenant>) => api.put<Tenant>(`/tenants/${id}`, body),
+  remove: (id: number) => api.del<void>(`/tenants/${id}`),
+};
+// ---- people_movement ----
+export const personMovementApi = {
+  list: () => api.get<{ items: PersonMovement[] }>("/people-movement"),
+  get: (id: number) => api.get<PersonMovement>(`/people-movement/${id}`),
+  create: (body: Partial<PersonMovement>) => api.post<PersonMovement>("/people-movement", body),
+  update: (id: number, body: Partial<PersonMovement>) => api.put<PersonMovement>(`/people-movement/${id}`, body),
+  remove: (id: number) => api.del<void>(`/people-movement/${id}`),
+};
+// ---- projects ----
+export const projectApi = {
+  list: () => api.get<{ items: Project[] }>("/projects"),
+  get: (id: number) => api.get<Project>(`/projects/${id}`),
+  create: (body: Partial<Project>) => api.post<Project>("/projects", body),
+  update: (id: number, body: Partial<Project>) => api.put<Project>(`/projects/${id}`, body),
+  remove: (id: number) => api.del<void>(`/projects/${id}`),
+};
+// ---- schools ----
+export const schoolApi = {
+  list: () => api.get<{ items: School[] }>("/schools"),
+  get: (id: number) => api.get<School>(`/schools/${id}`),
+  create: (body: Partial<School>) => api.post<School>("/schools", body),
+  update: (id: number, body: Partial<School>) => api.put<School>(`/schools/${id}`, body),
+  remove: (id: number) => api.del<void>(`/schools/${id}`),
+};
+
+

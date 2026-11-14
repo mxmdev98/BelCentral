@@ -167,6 +167,187 @@ export interface UserWithPermissions extends User {
   permissions: UserPermission[];
 }
 
+// ---- Houses ----
+export interface House {
+  id: number;
+  village_id: number | null;
+  village_name: string | null;
+  clan_id: number | null;
+  clan_name: string | null;
+  owner_name: string;
+  house_type: string;
+  house_purpose: string;
+  num_houses: number;
+  comments: string | null;
+  created_by: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ---- Disabled Persons ----
+export interface DisabledPerson {
+  id: number;
+  village_id: number | null;
+  village_name: string | null;
+  clan_id: number | null;
+  clan_name: string | null;
+  surname: string | null;
+  given_names: string;
+  gender: "Male" | "Female" | null;
+  age: number | null;
+  nature_of_disability: string;
+  comments: string | null;
+  created_by: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ---- Deaths ----
+export interface Death {
+  id: number;
+  village_id: number | null;
+  village_name: string | null;
+  clan_id: number | null;
+  clan_name: string | null;
+  surname: string | null;
+  given_names: string;
+  gender: "Male" | "Female" | null;
+  age: number | null;
+  date_of_death: string | null;
+  cause_of_death: string | null;
+  comments: string | null;
+  created_by: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ---- Births ----
+export interface Birth {
+  id: number;
+  village_id: number | null;
+  village_name: string | null;
+  clan_id: number | null;
+  clan_name: string | null;
+  child_name: string;
+  father_name: string | null;
+  mother_name: string | null;
+  gender: "Male" | "Female" | null;
+  date_of_birth: string | null;
+  time_of_birth: string | null;
+  place_of_birth: string | null;
+  comments: string | null;
+  created_by: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ---- Marriages ----
+export interface Marriage {
+  id: number;
+  village_id: number | null;
+  village_name: string | null;
+  clan_id: number | null;
+  clan_name: string | null;
+  husband_surname: string | null;
+  husband_given_names: string;
+  wife_surname: string | null;
+  wife_given_names: string | null;
+  date_of_marriage: string | null;
+  marriage_type: string | null;
+  place_of_marriage: string | null;
+  comments: string | null;
+  created_by: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ---- Tenants ----
+export interface Tenant {
+  id: number;
+  village_id: number | null;
+  village_name: string | null;
+  clan_id: number | null;
+  clan_name: string | null;
+  given_name: string;
+  father_name: string | null;
+  mother_name: string | null;
+  gender: "Male" | "Female" | null;
+  date_of_birth: string | null;
+  landlord_name: string | null;
+  place_of_origin: string | null;
+  profession: string | null;
+  comments: string | null;
+  created_by: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ---- People Movement ----
+export interface PersonMovement {
+  id: number;
+  village_id: number | null;
+  village_name: string | null;
+  clan_id: number | null;
+  clan_name: string | null;
+  surname: string | null;
+  given_names: string;
+  gender: "Male" | "Female" | null;
+  age: number | null;
+  direction: "leaving" | "arriving";
+  movement_date: string | null;
+  location: string | null;
+  reason: string | null;
+  comments: string | null;
+  created_by: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ---- Community Projects ----
+export interface Project {
+  id: number;
+  village_id: number | null;
+  village_name: string | null;
+  clan_id: number | null;
+  clan_name: string | null;
+  project_type: string;
+  funding_sources: string | null;
+  implementing_organizations: string | null;
+  start_date: string | null;
+  finish_date: string | null;
+  project_status: string | null;
+  comments: string | null;
+  created_by: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ---- Schools & Education ----
+export interface School {
+  id: number;
+  village_id: number | null;
+  village_name: string | null;
+  clan_id: number | null;
+  clan_name: string | null;
+  school_type: string;
+  school_name: string;
+  operating_agency: string | null;
+  male_students: number;
+  female_students: number;
+  male_teachers: number;
+  female_teachers: number;
+  distance_km: string | null;
+  travel_time: string | null;
+  travel_mode: string | null;
+  location_type: string | null;
+  comments: string | null;
+  created_by: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+
+
 // Standard API error shape (mirrors backend errorHandler).
 export interface ApiError {
   error: string;

@@ -1,38 +1,47 @@
 // src/context/AuthContext.tsx
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { authApi, permissionsApi } from "../api";
-import type { AuthUser, UserPermissions } from "../types";
+import type { AuthUser } from "../types";
+import { ALL_RESOURCE_KEYS } from "../config/permissions";
 
-const FULL_PERMS: UserPermissions = {
-  residents: { read: true, create: true, update: true },
-  ward_officials: { read: true, create: true, update: true },
-};
+// A complete permission map for the logged-in user.
+// Every resource in ALL_RESOURCE_KEYS has an entry (no undefined lookups).
+// Admins always have all true. Officials have only what's been granted.
+export type PermMap = Record<string, { read: boolean; create: boolean; update: boolean }>;
 
-function emptyPerms(): UserPermissions {
-  return {
-    residents: { read: false, create: false, update: false },
-    ward_officials: { read: false, create: false, update: false },
-  };
+function fullPerms(): PermMap {
+  const m: PermMap = {};
+  for (const key of ALL_RESOURCE_KEYS) {
+    m[key] = { read: true, create: true, update: true };
+  }
+  return m;
 }
 
-// Convert a UserWithPermissions response into the UserPermissions shape
-// used by the `can()` helper.
+function emptyPerms(): PermMap {
+  const m: PermMap = {};
+  for (const key of ALL_RESOURCE_KEYS) {
+    m[key] = { read: false, create: false, update: false };
+  }
+  return m;
+}
+
+// Convert a permissions API response into a PermMap
 function permsFromResponse(wp: {
   role: string;
   permissions: { resource: string; can_read: boolean; can_create: boolean; can_update: boolean }[];
-}): UserPermissions {
-  if (wp.role === "admin") return FULL_PERMS;
-  const p = emptyPerms();
+}): PermMap {
+  if (wp.role === "admin") return fullPerms();
+  const m = emptyPerms();
   for (const perm of wp.permissions) {
-    if (p[perm.resource]) {
-      p[perm.resource] = {
+    if (m[perm.resource]) {
+      m[perm.resource] = {
         read: perm.can_read,
         create: perm.can_create,
         update: perm.can_update,
       };
     }
   }
-  return p;
+  return m;
 }
 
 interface AuthContextValue {
@@ -41,6 +50,8 @@ interface AuthContextValue {
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   isAdmin: boolean;
+  // Permission helper — always true for admin; for officials, reflects granted perms.
+  // Returns false for unknown resources (defensive).
   can: (resource: string, action: "read" | "create" | "update") => boolean;
 }
 
@@ -48,7 +59,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [perms, setPerms] = useState<UserPermissions | null>(null);
+  const [perms, setPerms] = useState<PermMap | null>(null);
   const [loading, setLoading] = useState(true);
 
   // On initial load: check if already logged in (cookie), then fetch perms
@@ -57,7 +68,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .me()
       .then((r) => {
         setUser(r.user);
-        // Fetch MY permissions (works for both admin and official)
         return permissionsApi.getMine();
       })
       .then((wp) => {
@@ -70,7 +80,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(username: string, password: string) {
     const r = await authApi.login(username, password);
     setUser(r.user);
-    // Fetch MY permissions
     try {
       const wp = await permissionsApi.getMine();
       setPerms(permsFromResponse(wp));
