@@ -2,16 +2,17 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { authApi, permissionsApi } from "../api";
 import type { AuthUser } from "../types";
-import { ALL_RESOURCE_KEYS } from "../config/permissions";
+import { ALL_PERMISSIONED_KEYS } from "../config/permissions";
 
 // A complete permission map for the logged-in user.
-// Every resource in ALL_RESOURCE_KEYS has an entry (no undefined lookups).
-// Admins always have all true. Officials have only what's been granted.
+// Every permissionable resource (registers + read-only "reports") has an
+// entry (no undefined lookups). Admins always have all true. Officials have
+// only what's been granted, with per-resource defaults applied by the backend.
 export type PermMap = Record<string, { read: boolean; create: boolean; update: boolean }>;
 
 function fullPerms(): PermMap {
   const m: PermMap = {};
-  for (const key of ALL_RESOURCE_KEYS) {
+  for (const key of ALL_PERMISSIONED_KEYS) {
     m[key] = { read: true, create: true, update: true };
   }
   return m;
@@ -19,7 +20,7 @@ function fullPerms(): PermMap {
 
 function emptyPerms(): PermMap {
   const m: PermMap = {};
-  for (const key of ALL_RESOURCE_KEYS) {
+  for (const key of ALL_PERMISSIONED_KEYS) {
     m[key] = { read: false, create: false, update: false };
   }
   return m;

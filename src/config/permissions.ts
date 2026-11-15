@@ -54,7 +54,23 @@ export const resourceKeysByGroup = (group: "population" | "land") =>
 
 // The "reports" resource is a separate permission (view reports), not a
 // register table. It is granted as its own matrix row group.
+// It is READ-ONLY — only the Read checkbox is meaningful and shown; create
+// and update are never persisted on the backend.
 export const REPORTS_RESOURCE = {
   key: "reports",
   label: "Reports",
 };
+
+// Resources that only support the `read` action. The admin permission matrix
+// hides the Create/Update columns for these, and the backend clamps them to
+// false on upsert. Mirrors backend READONLY_RESOURCES.
+export const READONLY_RESOURCES = new Set<string>([REPORTS_RESOURCE.key]);
+
+// Every resource that can carry a permission — register tables PLUS the
+// read-only "reports" resource. AuthContext uses this (not ALL_RESOURCE_KEYS)
+// to build the permission map, so can("reports", "read") actually resolves for
+// officials instead of always being false.
+export const ALL_PERMISSIONED_KEYS: string[] = [
+  ...ALL_RESOURCE_KEYS,
+  REPORTS_RESOURCE.key,
+];

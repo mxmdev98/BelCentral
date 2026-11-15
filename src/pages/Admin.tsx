@@ -7,7 +7,7 @@ import ConfirmDialog from "../components/ConfirmDialog";
 import PasswordField from "../components/PasswordField";
 import {
   ALL_RESOURCES, ALL_RESOURCE_KEYS,
-  resourceKeysByGroup, REPORTS_RESOURCE,
+  resourceKeysByGroup, REPORTS_RESOURCE, READONLY_RESOURCES,
 } from "../config/permissions";
 
 const RESOURCE_LABELS: Record<string, string> = Object.fromEntries(
@@ -20,6 +20,12 @@ RESOURCE_LABELS[REPORTS_RESOURCE.key] = REPORTS_RESOURCE.label;
 // scrolling. Reports is a separate single-row card (read-only meaning).
 const POPULATION_KEYS = resourceKeysByGroup("population");
 const LAND_KEYS = resourceKeysByGroup("land");
+
+// The actions shown for a given resource. Read-only resources (e.g. reports)
+// only expose the Read checkbox — create/update are not meaningful.
+function actionsFor(resource: string): PermAction[] {
+  return READONLY_RESOURCES.has(resource) ? ["can_read"] : ACTIONS;
+}
 
 // Color coding for the three permission actions. Each action gets its own hue
 // across header text, cell tint, and the checkbox accent-color, so the three
@@ -149,10 +155,12 @@ export default function Admin() {
     for (const u of users) {
       for (const r of [...ALL_RESOURCE_KEYS, REPORTS_RESOURCE.key]) {
         const perm = u.permissions.find((p) => p.resource === r);
+        const isReadonly = READONLY_RESOURCES.has(r);
         draft[`${u.id}:${r}`] = {
           can_read: perm?.can_read ?? false,
-          can_create: perm?.can_create ?? false,
-          can_update: perm?.can_update ?? false,
+          // create/update are never meaningful for read-only resources
+          can_create: isReadonly ? false : (perm?.can_create ?? false),
+          can_update: isReadonly ? false : (perm?.can_update ?? false),
         };
       }
     }
@@ -166,8 +174,10 @@ export default function Admin() {
     setPermEditMode(false);
   }
 
-  // Toggle a single checkbox in the draft
+  // Toggle a single checkbox in the draft.
+  // Read-only resources can only toggle Read; create/update are ignored.
   function toggleDraftPerm(userId: number, resource: string, action: "can_read" | "can_create" | "can_update") {
+    if (READONLY_RESOURCES.has(resource) && action !== "can_read") return;
     const key = `${userId}:${resource}`;
     setPermDraft((prev) => ({
       ...prev,
@@ -191,12 +201,14 @@ export default function Admin() {
         const key = `${u.id}:${r}`;
         const draft = permDraft[key];
         if (!draft) continue;
+        const isReadonly = READONLY_RESOURCES.has(r);
         try {
           await permissionsApi.upsert(u.id, {
             resource: r,
             can_read: draft.can_read,
-            can_create: draft.can_create,
-            can_update: draft.can_update,
+            // Always send false for create/update on read-only resources.
+            can_create: isReadonly ? false : draft.can_create,
+            can_update: isReadonly ? false : draft.can_update,
           });
           successCount++;
         } catch {
@@ -512,7 +524,7 @@ function PermissionMatrix({
             <tr>
               <th className="px-4 py-3 font-semibold">User</th>
               {resourceKeys.map((r) => (
-                <th key={r} className="px-4 py-3 font-semibold text-center" colSpan={3}>
+                <th key={r} className="px-4 py-3 font-semibold text-center" colSpan={actionsFor(r).length}>
                   {RESOURCE_LABELS[r] ?? r}
                 </th>
               ))}
@@ -521,7 +533,7 @@ function PermissionMatrix({
               <th></th>
               {resourceKeys.map((r) => (
                 <FragmentTag key={r}>
-                  {ACTIONS.map((a) => (
+                  {actionsFor(r).map((a) => (
                     <th
                       key={`${r}-${a}`}
                       className={`px-2 py-2 text-xs text-center font-semibold ${ACTION_COLORS[a].header} ${ACTION_COLORS[a].cell}`}
@@ -560,7 +572,7 @@ function PermissionMatrix({
                   const checkboxDisabled = !permEditMode || isAdminOrDisabled;
                   return (
                     <FragmentTag key={r}>
-                      {ACTIONS.map((a) => {
+                      {actionsFor(r).map((a) => {
                         const val = a === "can_read" ? readVal : a === "can_create" ? createVal : updateVal;
                         return (
                           <td key={`${u.id}-${r}-${a[4]}`} className={`px-2 py-3 text-center ${ACTION_COLORS[a].cell}`}>
