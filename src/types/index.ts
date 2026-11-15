@@ -103,13 +103,25 @@ export interface ResidentSearchParams {
 }
 
 export type ReportType =
+  // Population register
   | "residents_per_village"
   | "gender_per_village"
   | "by_tribe_and_clan"
   | "by_employment"
   | "by_marital"
   | "by_education"
-  | "age_distribution";
+  | "age_distribution"
+  // Recently added registers
+  | "deaths_per_village"
+  | "births_per_village"
+  | "marriages_per_village"
+  | "people_movement_by_direction"
+  | "disabled_per_village"
+  // Land register
+  | "houses_by_type"
+  | "projects_by_status"
+  | "schools_by_type"
+  | "tenants_per_village";
 
 export interface ReportRow {
   label: string;

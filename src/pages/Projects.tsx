@@ -30,7 +30,7 @@ export default function Projects() {
   const filtered = items.filter((item) => {
     if (search) {
       const s = search.toLowerCase();
-      const hay = [item.project_type, item.project_status, item.start_date].join(" ").toLowerCase();
+      const hay = [item.project_type, item.project_status, item.funding_sources, item.start_date].join(" ").toLowerCase();
       if (!hay.includes(s)) return false;
     }
     if (villageFilter && item.village_id !== Number(villageFilter)) return false;
@@ -84,9 +84,10 @@ export default function Projects() {
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-slate-600 text-left">
               <tr>
-                <th className="px-4 py-3 font-semibold">Name</th>
+                <th className="px-4 py-3 font-semibold">Project</th>
                 <th className="px-4 py-3 font-semibold">Village</th>
-                <th className="px-4 py-3 font-semibold">Clan</th>
+                <th className="px-4 py-3 font-semibold">Status</th>
+                <th className="px-4 py-3 font-semibold">Funding sources</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
@@ -97,10 +98,27 @@ export default function Projects() {
                     <Link to={`/projects/${item.id}`} className="font-medium text-brand-700 hover:underline">
                       {item.project_type}
                     </Link>
-                    <div className="text-xs text-slate-500">{`${item.project_status || '—'} · ${item.start_date || '—'}`}</div>
+                    {item.start_date && (
+                      <div className="text-xs text-slate-500">Started {item.start_date}</div>
+                    )}
                   </td>
                   <td className="px-4 py-3">{item.village_name || "—"}</td>
-                  <td className="px-4 py-3">{item.clan_name || "—"}</td>
+                  <td className="px-4 py-3">
+                    {item.project_status ? (
+                      <span className={`badge ${
+                        item.project_status.toLowerCase() === "completed" ? "bg-green-100 text-green-800" :
+                        item.project_status.toLowerCase() === "ongoing" ? "bg-blue-100 text-blue-800" :
+                        item.project_status.toLowerCase() === "planned" ? "bg-slate-100 text-slate-600" :
+                        item.project_status.toLowerCase() === "delayed" ? "bg-red-100 text-red-800" :
+                        "bg-slate-100 text-slate-600"
+                      }`}>
+                        {item.project_status}
+                      </span>
+                    ) : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-slate-600 text-xs max-w-xs truncate" title={item.funding_sources ?? ""}>
+                    {item.funding_sources || "—"}
+                  </td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     {can("projects", "update") && (
                       <Link to={`/projects/${item.id}/edit`} className="text-brand-700 hover:underline mr-3">Edit</Link>
@@ -112,10 +130,10 @@ export default function Projects() {
                 </tr>
               ))}
               {filtered.length === 0 && !loading && (
-                <tr><td colSpan={4} className="px-4 py-10 text-center text-slate-500">No project records found.</td></tr>
+                <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-500">No project records found.</td></tr>
               )}
               {loading && (
-                <tr><td colSpan={4} className="px-4 py-10 text-center text-slate-500">Loading…</td></tr>
+                <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-500">Loading…</td></tr>
               )}
             </tbody>
           </table>

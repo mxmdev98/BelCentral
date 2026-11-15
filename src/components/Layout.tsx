@@ -17,14 +17,13 @@ const POPULATION_KEYS = new Set([
   "deaths",
   "births",
   "marriages",
-  "tenants",
   "people_movement",
 ]);
 
 // Land registry: places & infrastructure. villages + tribes/clans are
 // admin-managed master lists (not per-user permission resources), so they
 // are shown only to admins. The rest are permission-gated registers.
-const LAND_PERMISSION_KEYS = new Set(["houses", "projects", "schools"]);
+const LAND_PERMISSION_KEYS = new Set(["houses", "tenants", "projects", "schools"]);
 const LAND_ADMIN_LINKS: NavLink[] = [
   { path: "/villages", label: "Villages" },
   { path: "/tribes-clans", label: "Tribes & Clans" },
@@ -146,7 +145,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             {navItem("/dashboard", "Dashboard")}
             <NavDropdown label="Population Registry" links={populationLinks} location={location} />
             <NavDropdown label="Land Registry" links={landLinks} location={location} />
-            {navItem("/reports", "Reports")}
+            {can("reports", "read") && navItem("/reports", "Reports")}
             {isAdmin && navItem("/admin", "Admin")}
           </nav>
           <div className="flex items-center gap-3 text-sm ml-auto">

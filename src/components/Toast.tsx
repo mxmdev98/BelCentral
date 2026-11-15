@@ -20,11 +20,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastCtx.Provider value={{ push }}>
       {children}
-      <div className="fixed top-4 right-4 z-50 space-y-2 w-[min(360px,calc(100vw-2rem))]">
+      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 space-y-2 w-[min(360px,calc(100vw-2rem))]">
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`rounded-md shadow-lg px-4 py-3 text-sm border ${
+            className={`rounded-md shadow-lg px-4 py-3 text-sm border text-center ${
               t.kind === "success"
                 ? "bg-green-50 border-green-300 text-green-800"
                 : t.kind === "error"

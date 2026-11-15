@@ -85,8 +85,10 @@ export default function PersonMovements() {
             <thead className="bg-slate-50 text-slate-600 text-left">
               <tr>
                 <th className="px-4 py-3 font-semibold">Name</th>
+                <th className="px-4 py-3 font-semibold">Direction</th>
+                <th className="px-4 py-3 font-semibold">Location</th>
+                <th className="px-4 py-3 font-semibold">Date</th>
                 <th className="px-4 py-3 font-semibold">Village</th>
-                <th className="px-4 py-3 font-semibold">Clan</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
@@ -97,10 +99,21 @@ export default function PersonMovements() {
                     <Link to={`/people-movement/${item.id}`} className="font-medium text-brand-700 hover:underline">
                       {item.given_names}
                     </Link>
-                    <div className="text-xs text-slate-500">{`${item.direction || '—'} · ${item.location || '—'} · ${item.movement_date || '—'}`}</div>
                   </td>
+                  <td className="px-4 py-3">
+                    {item.direction ? (
+                      <span className={`badge ${
+                        item.direction === "arriving"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-orange-100 text-orange-800"
+                      }`}>
+                        {item.direction === "arriving" ? "Arriving" : "Leaving"}
+                      </span>
+                    ) : "—"}
+                  </td>
+                  <td className="px-4 py-3">{item.location || "—"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{item.movement_date || "—"}</td>
                   <td className="px-4 py-3">{item.village_name || "—"}</td>
-                  <td className="px-4 py-3">{item.clan_name || "—"}</td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     {can("people_movement", "update") && (
                       <Link to={`/people-movement/${item.id}/edit`} className="text-brand-700 hover:underline mr-3">Edit</Link>
@@ -112,10 +125,10 @@ export default function PersonMovements() {
                 </tr>
               ))}
               {filtered.length === 0 && !loading && (
-                <tr><td colSpan={4} className="px-4 py-10 text-center text-slate-500">No movement records found.</td></tr>
+                <tr><td colSpan={6} className="px-4 py-10 text-center text-slate-500">No movement records found.</td></tr>
               )}
               {loading && (
-                <tr><td colSpan={4} className="px-4 py-10 text-center text-slate-500">Loading…</td></tr>
+                <tr><td colSpan={6} className="px-4 py-10 text-center text-slate-500">Loading…</td></tr>
               )}
             </tbody>
           </table>

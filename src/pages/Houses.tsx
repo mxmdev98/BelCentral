@@ -34,7 +34,7 @@ export default function Houses() {
   const filtered = houses.filter((h) => {
     if (search) {
       const s = search.toLowerCase();
-      if (!h.owner_name.toLowerCase().includes(s) && !h.clan_name?.toLowerCase().includes(s)) return false;
+      if (!h.owner_name.toLowerCase().includes(s) && !h.village_name?.toLowerCase().includes(s)) return false;
     }
     if (villageFilter && h.village_id !== Number(villageFilter)) return false;
     if (clanFilter && h.clan_id !== Number(clanFilter)) return false;
@@ -70,7 +70,7 @@ export default function Houses() {
               <label className="label">Search</label>
               <input
                 className="input"
-                placeholder="Owner or clan name"
+                placeholder="Owner or village name"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -108,7 +108,7 @@ export default function Houses() {
             <thead className="bg-slate-50 text-slate-600 text-left">
               <tr>
                 <th className="px-4 py-3 font-semibold">Owner</th>
-                <th className="px-4 py-3 font-semibold">Clan</th>
+                <th className="px-4 py-3 font-semibold">Village</th>
                 <th className="px-4 py-3 font-semibold">Type</th>
                 <th className="px-4 py-3 font-semibold">Purpose</th>
                 <th className="px-4 py-3 font-semibold">Houses</th>
@@ -123,9 +123,8 @@ export default function Houses() {
                     <Link to={`/houses/${h.id}`} className="font-medium text-brand-700 hover:underline">
                       {h.owner_name}
                     </Link>
-                    {h.village_name && <div className="text-xs text-slate-500">{h.village_name}</div>}
                   </td>
-                  <td className="px-4 py-3">{h.clan_name || "—"}</td>
+                  <td className="px-4 py-3">{h.village_name || "—"}</td>
                   <td className="px-4 py-3">
                     <span className={`badge ${
                       h.house_type === "Permanent" ? "bg-green-100 text-green-800" :

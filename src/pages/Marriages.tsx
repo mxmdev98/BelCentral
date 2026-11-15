@@ -92,28 +92,23 @@ export default function Marriages() {
                 <th className="px-4 py-3 font-semibold">Wife</th>
                 <th className="px-4 py-3 font-semibold">Date</th>
                 <th className="px-4 py-3 font-semibold">Place</th>
-                <th className="px-4 py-3 font-semibold">Village</th>
-                <th className="px-4 py-3 font-semibold">Clan</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filtered.map((item) => {
-                const husband = [item.husband_surname, item.husband_given_names].filter(Boolean).join(" ");
+                const husband = [item.husband_surname, item.husband_given_names].filter(Boolean).join(" ") || "—";
                 const wife = [item.wife_surname, item.wife_given_names].filter(Boolean).join(" ") || "—";
                 return (
                 <tr key={item.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3">
-                    <Link to={`/marriages/${item.id}`} className="font-medium text-brand-700 hover:underline">
-                      {husband}
-                    </Link>
-                  </td>
+                  <td className="px-4 py-3 font-medium text-slate-800">{husband}</td>
                   <td className="px-4 py-3">{wife}</td>
                   <td className="px-4 py-3 whitespace-nowrap">{item.date_of_marriage || "—"}</td>
                   <td className="px-4 py-3">{item.place_of_marriage || "—"}</td>
-                  <td className="px-4 py-3">{item.village_name || "—"}</td>
-                  <td className="px-4 py-3">{item.clan_name || "—"}</td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
+                    <Link to={`/marriages/${item.id}`} className="btn-secondary text-xs px-2 py-1 mr-2">
+                      View Details
+                    </Link>
                     {can("marriages", "update") && (
                       <Link to={`/marriages/${item.id}/edit`} className="text-brand-700 hover:underline mr-3">Edit</Link>
                     )}
@@ -125,10 +120,10 @@ export default function Marriages() {
                 );
               })}
               {filtered.length === 0 && !loading && (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-slate-500">No marriage records found.</td></tr>
+                <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-500">No marriage records found.</td></tr>
               )}
               {loading && (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-slate-500">Loading…</td></tr>
+                <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-500">Loading…</td></tr>
               )}
             </tbody>
           </table>

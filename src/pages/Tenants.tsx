@@ -88,7 +88,6 @@ export default function Tenants() {
                 <th className="px-4 py-3 font-semibold">Place of origin</th>
                 <th className="px-4 py-3 font-semibold">Landlord</th>
                 <th className="px-4 py-3 font-semibold">Village</th>
-                <th className="px-4 py-3 font-semibold">Clan</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
@@ -103,7 +102,6 @@ export default function Tenants() {
                   <td className="px-4 py-3">{item.place_of_origin || "—"}</td>
                   <td className="px-4 py-3">{item.landlord_name || "—"}</td>
                   <td className="px-4 py-3">{item.village_name || "—"}</td>
-                  <td className="px-4 py-3">{item.clan_name || "—"}</td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     {can("tenants", "update") && (
                       <Link to={`/tenants/${item.id}/edit`} className="text-brand-700 hover:underline mr-3">Edit</Link>
@@ -115,10 +113,10 @@ export default function Tenants() {
                 </tr>
               ))}
               {filtered.length === 0 && !loading && (
-                <tr><td colSpan={6} className="px-4 py-10 text-center text-slate-500">No tenant records found.</td></tr>
+                <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-500">No tenant records found.</td></tr>
               )}
               {loading && (
-                <tr><td colSpan={6} className="px-4 py-10 text-center text-slate-500">Loading…</td></tr>
+                <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-500">Loading…</td></tr>
               )}
             </tbody>
           </table>

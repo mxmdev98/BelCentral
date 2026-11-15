@@ -86,7 +86,6 @@ export default function Schools() {
               <tr>
                 <th className="px-4 py-3 font-semibold">Name</th>
                 <th className="px-4 py-3 font-semibold">Village</th>
-                <th className="px-4 py-3 font-semibold">Clan</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
@@ -100,7 +99,6 @@ export default function Schools() {
                     <div className="text-xs text-slate-500">{`${item.school_type || '—'} · ${item.operating_agency || '—'}`}</div>
                   </td>
                   <td className="px-4 py-3">{item.village_name || "—"}</td>
-                  <td className="px-4 py-3">{item.clan_name || "—"}</td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     {can("schools", "update") && (
                       <Link to={`/schools/${item.id}/edit`} className="text-brand-700 hover:underline mr-3">Edit</Link>
@@ -112,10 +110,10 @@ export default function Schools() {
                 </tr>
               ))}
               {filtered.length === 0 && !loading && (
-                <tr><td colSpan={4} className="px-4 py-10 text-center text-slate-500">No school records found.</td></tr>
+                <tr><td colSpan={3} className="px-4 py-10 text-center text-slate-500">No school records found.</td></tr>
               )}
               {loading && (
-                <tr><td colSpan={4} className="px-4 py-10 text-center text-slate-500">Loading…</td></tr>
+                <tr><td colSpan={3} className="px-4 py-10 text-center text-slate-500">Loading…</td></tr>
               )}
             </tbody>
           </table>

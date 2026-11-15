@@ -92,9 +92,6 @@ export default function Dashboard() {
 
   if (loading) return <div className="text-slate-500">Loading dashboard…</div>;
 
-  // Filter resources to only those the user can read
-  const visibleResources = ALL_RESOURCES.filter((r) => can(r.key, "read"));
-
   return (
     <div className="space-y-6">
       <div>
@@ -131,16 +128,55 @@ export default function Dashboard() {
             </div>
           </Link>
         )}
-        {visibleResources.length > 0 && (
-          <Link to={visibleResources[0].path} className="card hover:shadow-md transition">
-            <div className="card-body">
-              <div className="text-xs uppercase text-slate-500">Quick action</div>
-              <div className="text-lg font-semibold mt-1 text-brand-700">
-                View {visibleResources[0].label} →
-              </div>
-            </div>
-          </Link>
-        )}
+      </div>
+
+      {/* Quick action cards — common shortcuts */}
+      <div>
+        <h2 className="text-sm font-semibold text-slate-700 mb-2">Quick actions</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {can("residents", "create") && (
+            <QuickAction to="/residents/new" label="Add resident" hint="Register a new person" />
+          )}
+          {can("births", "create") && (
+            <QuickAction to="/births/new" label="Record birth" hint="Log a new birth" />
+          )}
+          {can("deaths", "create") && (
+            <QuickAction to="/deaths/new" label="Record death" hint="Log a new death" />
+          )}
+          {can("marriages", "create") && (
+            <QuickAction to="/marriages/new" label="Record marriage" hint="Log a marriage" />
+          )}
+          {can("people_movement", "create") && (
+            <QuickAction to="/people-movement/new" label="Add movement" hint="Leaving / arriving" />
+          )}
+          {can("houses", "create") && (
+            <QuickAction to="/houses/new" label="Add house" hint="Register a house" />
+          )}
+          {can("tenants", "create") && (
+            <QuickAction to="/tenants/new" label="Add tenant" hint="Register a tenant" />
+          )}
+          {can("projects", "create") && (
+            <QuickAction to="/projects/new" label="Add project" hint="New community project" />
+          )}
+          {can("schools", "create") && (
+            <QuickAction to="/schools/new" label="Add school" hint="Register a school" />
+          )}
+          {can("disabled_persons", "create") && (
+            <QuickAction to="/disabled-persons/new" label="Add disabled person" hint="Register person" />
+          )}
+          {can("ward_officials", "create") && (
+            <QuickAction to="/ward-officials/new" label="Add official" hint="Register official" />
+          )}
+          {can("reports", "read") && (
+            <QuickAction to="/reports" label="View reports" hint="Statistics & charts" />
+          )}
+          {isAdmin && (
+            <QuickAction to="/villages" label="Manage villages" hint="Master list" />
+          )}
+          {isAdmin && (
+            <QuickAction to="/admin" label="Admin panel" hint="Users & permissions" />
+          )}
+        </div>
       </div>
 
       {/* Two-column reports — only show if user can read residents */}
@@ -232,5 +268,16 @@ function StatCard({ label, value }: { label: string; value: number }) {
         <div className="text-3xl font-bold mt-1">{value}</div>
       </div>
     </div>
+  );
+}
+
+function QuickAction({ to, label, hint }: { to: string; label: string; hint: string }) {
+  return (
+    <Link to={to} className="card hover:shadow-md hover:border-brand-300 transition">
+      <div className="card-body py-3">
+        <div className="text-sm font-semibold text-brand-700">{label} →</div>
+        <div className="text-xs text-slate-500 mt-0.5">{hint}</div>
+      </div>
+    </Link>
   );
 }

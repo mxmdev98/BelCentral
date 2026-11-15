@@ -1,15 +1,25 @@
 // src/pages/Admin.tsx — admin panel: user management + permissions matrix
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { usersApi, permissionsApi } from "../api";
 import type { UserWithPermissions } from "../types";
 import { useToast } from "../components/Toast";
 import ConfirmDialog from "../components/ConfirmDialog";
 import PasswordField from "../components/PasswordField";
-import { ALL_RESOURCES, ALL_RESOURCE_KEYS } from "../config/permissions";
+import {
+  ALL_RESOURCES, ALL_RESOURCE_KEYS,
+  resourceKeysByGroup, REPORTS_RESOURCE,
+} from "../config/permissions";
 
 const RESOURCE_LABELS: Record<string, string> = Object.fromEntries(
   ALL_RESOURCES.map((r) => [r.key, r.label])
 );
+RESOURCE_LABELS[REPORTS_RESOURCE.key] = REPORTS_RESOURCE.label;
+
+// Resource groupings for the permission matrix — split into Population and
+// Land registers so each table is narrow enough to read without horizontal
+// scrolling. Reports is a separate single-row card (read-only meaning).
+const POPULATION_KEYS = resourceKeysByGroup("population");
+const LAND_KEYS = resourceKeysByGroup("land");
 
 // Color coding for the three permission actions. Each action gets its own hue
 // across header text, cell tint, and the checkbox accent-color, so the three
@@ -137,7 +147,7 @@ export default function Admin() {
   function startEdit() {
     const draft: Record<PermDraftKey, PermDraftValue> = {};
     for (const u of users) {
-      for (const r of ALL_RESOURCE_KEYS) {
+      for (const r of [...ALL_RESOURCE_KEYS, REPORTS_RESOURCE.key]) {
         const perm = u.permissions.find((p) => p.resource === r);
         draft[`${u.id}:${r}`] = {
           can_read: perm?.can_read ?? false,
@@ -177,7 +187,7 @@ export default function Admin() {
     for (const u of users) {
       // Skip admins (they bypass perms) and disabled users
       if (u.role === "admin" || !u.is_active) continue;
-      for (const r of ALL_RESOURCE_KEYS) {
+      for (const r of [...ALL_RESOURCE_KEYS, REPORTS_RESOURCE.key]) {
         const key = `${u.id}:${r}`;
         const draft = permDraft[key];
         if (!draft) continue;
@@ -348,133 +358,84 @@ export default function Admin() {
       )}
 
       {tab === "permissions" && (
-        <div className="card overflow-hidden">
-          <div className="card-body">
-            <div className="flex items-start justify-between flex-wrap gap-2 mb-2">
-              <div>
-                <h2 className="font-semibold">Permission Matrix</h2>
-                <p className="text-sm text-slate-500 mt-1">
-                  Grant officials read / create / update access per table. Admins always have full access.
-                  <strong> Delete is admin-only</strong> — no permission row exists for it.
-                </p>
-              </div>
-              {/* Edit / Save / Cancel buttons */}
-              <div className="flex gap-2">
-                {!permEditMode ? (
-                  <button onClick={startEdit} className="btn-primary">
-                    Edit permissions
-                  </button>
-                ) : (
-                  <>
-                    <button onClick={cancelEdit} className="btn-secondary" disabled={savingPerms}>
-                      Cancel
+        <div className="space-y-4">
+          <div className="card">
+            <div className="card-body">
+              <div className="flex items-start justify-between flex-wrap gap-2 mb-2">
+                <div>
+                  <h2 className="font-semibold">Permission Matrix</h2>
+                  <p className="text-sm text-slate-500 mt-1">
+                    Grant officials read / create / update access per table, grouped by register.
+                    Admins always have full access. <strong>Delete is admin-only</strong> — no permission row exists for it.
+                  </p>
+                </div>
+                {/* Edit / Save / Cancel buttons */}
+                <div className="flex gap-2">
+                  {!permEditMode ? (
+                    <button onClick={startEdit} className="btn-primary">
+                      Edit permissions
                     </button>
-                    <button onClick={savePerms} className="btn-primary" disabled={savingPerms}>
-                      {savingPerms ? "Saving…" : "Save permissions"}
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-            {!permEditMode && (
-              <p className="text-xs text-slate-400 mt-2">
-                Click "Edit permissions" to modify the checkboxes below.
-              </p>
-            )}
-            {permEditMode && (
-              <p className="text-xs text-brand-600 mt-2">
-                Editing mode — changes are not saved until you click "Save permissions".
-              </p>
-            )}
-          </div>
-          <div className="overflow-x-auto">
-            <div className="flex items-center gap-4 px-4 py-2 text-xs text-slate-600 border-b border-slate-100">
-              <span className="font-medium text-slate-500">Legend:</span>
-              {ACTIONS.map((a) => (
-                <span key={a} className="inline-flex items-center gap-1.5">
-                  <span className={`inline-block h-3 w-3 rounded-sm ${ACTION_COLORS[a].cell} border border-slate-200`} />
-                  <span className={ACTION_COLORS[a].header}>{ACTION_LABELS[a]}</span>
-                </span>
-              ))}
-            </div>
-            <table className="min-w-full text-sm">
-              <thead className="bg-slate-50 text-slate-600 text-left">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">User</th>
-                  {ALL_RESOURCE_KEYS.map((r) => (
-                    <th key={r} className="px-4 py-3 font-semibold text-center" colSpan={3}>
-                      {RESOURCE_LABELS[r]}
-                    </th>
-                  ))}
-                </tr>
-                <tr className="border-t border-slate-100">
-                  <th></th>
-                  {ALL_RESOURCE_KEYS.map((r) => (
+                  ) : (
                     <>
-                      {ACTIONS.map((a) => (
-                        <th
-                          key={`${r}-${a}`}
-                          className={`px-2 py-2 text-xs text-center font-semibold ${ACTION_COLORS[a].header} ${ACTION_COLORS[a].cell}`}
-                          title={ACTION_LABELS[a]}
-                        >
-                          {ACTION_LABELS[a][0]}
-                        </th>
-                      ))}
+                      <button onClick={cancelEdit} className="btn-secondary" disabled={savingPerms}>
+                        Cancel
+                      </button>
+                      <button onClick={savePerms} className="btn-primary" disabled={savingPerms}>
+                        {savingPerms ? "Saving…" : "Save permissions"}
+                      </button>
                     </>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {users.map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3">
-                      <div className="font-medium">{u.username}</div>
-                      <div className="text-xs text-slate-500">
-                        {u.role === "admin" ? "Admin (full access)" : "Official"}
-                        {!u.is_active && " · disabled"}
-                      </div>
-                    </td>
-                    {ALL_RESOURCE_KEYS.map((r) => {
-                      const perm = u.permissions.find((p) => p.resource === r);
-                      const key = `${u.id}:${r}`;
-                      const isAdminOrDisabled = u.role === "admin" || !u.is_active;
-                      // In edit mode, read from draft; otherwise from saved perms
-                      const readVal = permEditMode && !isAdminOrDisabled
-                        ? (permDraft[key]?.can_read ?? false)
-                        : (u.role === "admin" ? true : (perm?.can_read ?? false));
-                      const createVal = permEditMode && !isAdminOrDisabled
-                        ? (permDraft[key]?.can_create ?? false)
-                        : (u.role === "admin" ? true : (perm?.can_create ?? false));
-                      const updateVal = permEditMode && !isAdminOrDisabled
-                        ? (permDraft[key]?.can_update ?? false)
-                        : (u.role === "admin" ? true : (perm?.can_update ?? false));
-                      // Checkboxes are disabled when NOT in edit mode (read-only),
-                      // or when the user is admin/disabled (can't change those)
-                      const checkboxDisabled = !permEditMode || isAdminOrDisabled;
-                      return (
-                        <>
-                          {ACTIONS.map((a) => {
-                            const val = a === "can_read" ? readVal : a === "can_create" ? createVal : updateVal;
-                            return (
-                              <td key={`${u.id}-${r}-${a[4]}`} className={`px-2 py-3 text-center ${ACTION_COLORS[a].cell}`}>
-                                <input
-                                  type="checkbox"
-                                  className={`h-4 w-4 cursor-pointer ${ACTION_COLORS[a].accent}`}
-                                  checked={val}
-                                  disabled={checkboxDisabled}
-                                  onChange={() => toggleDraftPerm(u.id, r, a)}
-                                />
-                              </td>
-                            );
-                          })}
-                        </>
-                      );
-                    })}
-                  </tr>
+                  )}
+                </div>
+              </div>
+              {!permEditMode && (
+                <p className="text-xs text-slate-400 mt-2">
+                  Click "Edit permissions" to modify the checkboxes below.
+                </p>
+              )}
+              {permEditMode && (
+                <p className="text-xs text-brand-600 mt-2">
+                  Editing mode — changes are not saved until you click "Save permissions".
+                </p>
+              )}
+              <div className="flex items-center gap-4 px-1 py-2 mt-2 text-xs text-slate-600">
+                <span className="font-medium text-slate-500">Legend:</span>
+                {ACTIONS.map((a) => (
+                  <span key={a} className="inline-flex items-center gap-1.5">
+                    <span className={`inline-block h-3 w-3 rounded-sm ${ACTION_COLORS[a].cell} border border-slate-200`} />
+                    <span className={ACTION_COLORS[a].header}>{ACTION_LABELS[a]}</span>
+                  </span>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </div>
           </div>
+
+          <PermissionMatrix
+            title="Population Registry"
+            subtitle="People + vital events"
+            resourceKeys={POPULATION_KEYS}
+            users={users}
+            permEditMode={permEditMode}
+            permDraft={permDraft}
+            onToggle={toggleDraftPerm}
+          />
+          <PermissionMatrix
+            title="Land Registry"
+            subtitle="Property, tenancy, infrastructure & services"
+            resourceKeys={LAND_KEYS}
+            users={users}
+            permEditMode={permEditMode}
+            permDraft={permDraft}
+            onToggle={toggleDraftPerm}
+          />
+          <PermissionMatrix
+            title="Reports"
+            subtitle="View statistical reports (only Read is meaningful)"
+            resourceKeys={[REPORTS_RESOURCE.key]}
+            users={users}
+            permEditMode={permEditMode}
+            permDraft={permDraft}
+            onToggle={toggleDraftPerm}
+          />
         </div>
       )}
 
@@ -511,6 +472,116 @@ export default function Admin() {
         onConfirm={handleDelete}
         onCancel={() => setDeleteUser(null)}
       />
+    </div>
+  );
+}
+
+// ---- PermissionMatrix component ----
+// Renders one grouped permission table (Population / Land / Reports).
+// Kept narrow by only iterating the resources passed in `resourceKeys`,
+// so each table fits without long horizontal scrolling.
+interface PermissionMatrixProps {
+  title: string;
+  subtitle: string;
+  resourceKeys: string[];
+  users: UserWithPermissions[];
+  permEditMode: boolean;
+  permDraft: Record<string, PermDraftValue>;
+  onToggle: (userId: number, resource: string, action: PermAction) => void;
+}
+
+function PermissionMatrix({
+  title,
+  subtitle,
+  resourceKeys,
+  users,
+  permEditMode,
+  permDraft,
+  onToggle,
+}: PermissionMatrixProps) {
+  const FragmentTag = Fragment;
+  return (
+    <div className="card overflow-hidden">
+      <div className="card-body pb-2">
+        <h3 className="font-semibold text-slate-800">{title}</h3>
+        <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-sm">
+          <thead className="bg-slate-50 text-slate-600 text-left">
+            <tr>
+              <th className="px-4 py-3 font-semibold">User</th>
+              {resourceKeys.map((r) => (
+                <th key={r} className="px-4 py-3 font-semibold text-center" colSpan={3}>
+                  {RESOURCE_LABELS[r] ?? r}
+                </th>
+              ))}
+            </tr>
+            <tr className="border-t border-slate-100">
+              <th></th>
+              {resourceKeys.map((r) => (
+                <FragmentTag key={r}>
+                  {ACTIONS.map((a) => (
+                    <th
+                      key={`${r}-${a}`}
+                      className={`px-2 py-2 text-xs text-center font-semibold ${ACTION_COLORS[a].header} ${ACTION_COLORS[a].cell}`}
+                      title={ACTION_LABELS[a]}
+                    >
+                      {ACTION_LABELS[a][0]}
+                    </th>
+                  ))}
+                </FragmentTag>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {users.map((u) => (
+              <tr key={u.id} className="hover:bg-slate-50">
+                <td className="px-4 py-3">
+                  <div className="font-medium">{u.username}</div>
+                  <div className="text-xs text-slate-500">
+                    {u.role === "admin" ? "Admin (full access)" : "Official"}
+                    {!u.is_active && " · disabled"}
+                  </div>
+                </td>
+                {resourceKeys.map((r) => {
+                  const perm = u.permissions.find((p) => p.resource === r);
+                  const key = `${u.id}:${r}`;
+                  const isAdminOrDisabled = u.role === "admin" || !u.is_active;
+                  const readVal = permEditMode && !isAdminOrDisabled
+                    ? (permDraft[key]?.can_read ?? false)
+                    : (u.role === "admin" ? true : (perm?.can_read ?? false));
+                  const createVal = permEditMode && !isAdminOrDisabled
+                    ? (permDraft[key]?.can_create ?? false)
+                    : (u.role === "admin" ? true : (perm?.can_create ?? false));
+                  const updateVal = permEditMode && !isAdminOrDisabled
+                    ? (permDraft[key]?.can_update ?? false)
+                    : (u.role === "admin" ? true : (perm?.can_update ?? false));
+                  const checkboxDisabled = !permEditMode || isAdminOrDisabled;
+                  return (
+                    <FragmentTag key={r}>
+                      {ACTIONS.map((a) => {
+                        const val = a === "can_read" ? readVal : a === "can_create" ? createVal : updateVal;
+                        return (
+                          <td key={`${u.id}-${r}-${a[4]}`} className={`px-2 py-3 text-center ${ACTION_COLORS[a].cell}`}>
+                            <input
+                              type="checkbox"
+                              className={`h-4 w-4 cursor-pointer ${ACTION_COLORS[a].accent}`}
+                              checked={val}
+                              disabled={checkboxDisabled}
+                              onChange={() => onToggle(u.id, r, a)}
+                            />
+                          </td>
+                        );
+                      })}
+                    </FragmentTag>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
